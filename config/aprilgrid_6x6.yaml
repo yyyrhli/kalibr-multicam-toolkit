@@ -1,0 +1,13 @@
+target_type: 'aprilgrid'
+# 6x6 tag36h11，与设备标定板一致。
+# tagSpacing 是「缝宽 / 边长」，不是米：1.65cm / 5.5cm = 0.3
+tagCols: 6
+tagRows: 6
+tagSize: 0.055000
+tagSpacing: 0.300000
+reverseTagCols: true
+blackTagBorder: 2
+doSubpixRefinement: true
+maxSubpixDisplacement2: 4.0
+minTagsForValidObs: 4
+minBorderDistance: 4.0

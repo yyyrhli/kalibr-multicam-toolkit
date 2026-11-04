@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Project-local entry point for the already installed ROS1/TartanCalib backend.
+# The environment itself remains under ~/.cache/headset-calib; no source-tree
+# dependency on preprocess_videos is required at runtime.
+set -euo pipefail
+
+CALIB_CACHE_ROOT="${HEADSET_CALIB_CACHE_ROOT:-${HOME}/.cache/headset-calib}"
+CONDA_PREFIX="${HEADSET_CALIB_CONDA_PREFIX:-${CALIB_CACHE_ROOT}/conda/noetic}"
+TARTAN_WS="${HEADSET_CALIB_TARTAN_WS:-${CALIB_CACHE_ROOT}/tartan_ws}"
+if [[ -n "${CONDA_EXE:-}" ]]; then
+  DEFAULT_CONDA_BASE="$(cd "$(dirname "${CONDA_EXE}")/.." && pwd)"
+else
+  DEFAULT_CONDA_BASE="${HOME}/anaconda3"
+fi
+CONDA_BASE="${HEADSET_CALIB_CONDA_BASE:-${DEFAULT_CONDA_BASE}}"
+
+if [[ ! -x "${CONDA_PREFIX}/bin/python" || ! -f "${TARTAN_WS}/devel/setup.bash" ]]; then
+  echo "TartanCalib runtime is missing at ${TARTAN_WS} or ${CONDA_PREFIX}." >&2
+  exit 2
+fi
+
+unset PYTHONPATH CMAKE_PREFIX_PATH AMENT_PREFIX_PATH COLCON_PREFIX_PATH
+unset ROS_DISTRO ROS_VERSION ROS_PYTHON_VERSION ROS_PACKAGE_PATH
+
+set +u
+if [[ -f "${CONDA_BASE}/etc/profile.d/conda.sh" ]]; then
+  source "${CONDA_BASE}/etc/profile.d/conda.sh"
+  conda activate "${CONDA_PREFIX}"
+elif command -v micromamba >/dev/null 2>&1; then
+  eval "$(micromamba shell hook --shell bash)"
+  micromamba activate "${CONDA_PREFIX}"
+else
+  export CONDA_PREFIX
+  export PATH="${CONDA_PREFIX}/bin:${PATH}"
+fi
+runtime_command=("$@")
+set --
+source "${TARTAN_WS}/devel/setup.bash"
+set -u
+exec "${runtime_command[@]}"
