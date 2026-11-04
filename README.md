@@ -6,6 +6,30 @@ Kalibr 本身很强，但直接拿来标定多相机阵列，会撞上一堆工�
 
 > 定位：这是**准备与编排层**，不重新实现标定算法。真正的优化仍然由 Kalibr / TartanCalib 完成。
 
+<img src="docs/pipeline.svg" alt="数据流：从多路视频到 camchain" width="100%">
+
+**15 个 Python 模块 + 10 个 Shell 脚本 · 约 3400 行 · 零第三方依赖（只用 numpy / OpenCV / PyYAML）**
+
+---
+
+## 功能一览
+
+| 能力 | 入口 | 说明 |
+|---|---|---|
+| 环境自检 | `scripts/00_check_env.sh` | 检查 ROS1 / Kalibr / Python 依赖是否齐全 |
+| OpenCV 4.9 兼容补丁 | `scripts/01_patch_tartancalib_dlt.sh` | 修复 DS 模型 5 点 DLT 崩溃，幂等可重入 |
+| 分包拼接 | `python/stitch_packs.py` | 把 `pack_*` 分段录制拼成完整场次 |
+| 选帧与门禁 | `python/aprilgrid_selection.py` | AprilGrid 检测 + 八项覆盖度验收，不通过就拒绝 |
+| 相机 bag 构建 | `scripts/11_dump_session_bag.sh` | 多路视频 → ROS1 `mono8` bag，时间戳全局有序 |
+| 多相机标定 | `scripts/12_run_calibrate_cameras.sh` | 内参 + 相机间外参 |
+| 联合 bag 构建 | `scripts/20_prepare_imu_camera.sh` | 灰度图 + 全频率 IMU，单一时间轴 |
+| IMU–相机标定 | `scripts/21_run_calibrate_imu_camera.sh` | 外参 + 时间偏移 |
+| 共享时间偏移模式 | `python/kalibr_imucam_shared_timeshift.py` | 硬同步多相机，冻结时间优化只解外参 |
+| 结果转换 | `python/convert_kalibr_*.py` | Kalibr YAML → 生产用 JSON（含逆矩阵和符号约定） |
+| IMU 噪声估计 | `python/imu_rk002.py` | 静置数据实测 → Kalibr 连续时间噪声模型 |
+| 模型硬校验 | `python/camera_model.py` | 拒绝非 Double Sphere 配置，避免静默错标 |
+| 会话时间对齐 | `python/session_timestamps.py` | 多路丢帧情况下的时间戳一致性 |
+
 ---
 
 ## 解决的问题
