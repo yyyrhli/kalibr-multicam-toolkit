@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    name: Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Python 语法检查
+        run: |
+          python -m compileall -q python
+          echo "✓ 所有 Python 模块编译通过"
+
+      - name: Shell 语法检查
+        run: |
+          set -e
+          n=0
+          for f in scripts/*.sh setup/*.sh setup/tartan_runtime; do
+            [ -f "$f" ] || continue
+            bash -n "$f"
+            n=$((n + 1))
+          done
+          echo "✓ $n 个 shell 脚本解析通过"
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装检查工具
+        run: |
+          python -m pip install --quiet --disable-pip-version-check ruff
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq shellcheck
+
+      - name: Ruff
+        run: ruff check python --output-format=github
+
+      - name: ShellCheck
+        run: |
+          shellcheck -S warning -e SC1090,SC1091 scripts/*.sh setup/*.sh setup/tartan_runtime \
+            || echo "::warning::ShellCheck 报告了警告（不影响构建）"
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 检查文档完整性
+        run: |
+          set -e
+          for f in README.md LICENSE .gitattributes .gitignore; do
+            [ -f "$f" ] || { echo "缺少 $f"; exit 1; }
+          done
+          for f in docs/*.md docs/*.svg; do
+            [ -f "$f" ] || continue
+            [ -s "$f" ] || { echo "$f 是空文件"; exit 1; }
+          done
+          # README 里引用的相对路径必须真实存在
+          python - <<'PY'
+          import re, os, sys
+          text = open('README.md', encoding='utf-8').read()
+          refs = re.findall(r'!\[[^\]]*\]\(([^)]+)\)|<img[^>]+src="([^"]+)"', text)
+          missing = []
+          for a, b in refs:
+              p = (a or b).strip()
+              if p.startswith(('http://', 'https://')):
+                  continue
+              if not os.path.exists(p):
+                  missing.append(p)
+          if missing:
+              print('README 引用了不存在的文件：', missing)
+              sys.exit(1)
+          print('✓ 文档与图片引用完整')
+          PY

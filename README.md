@@ -1,10 +1,10 @@
 # kalibr-multicam-toolkit
 
+[![CI](https://github.com/yyyrhli/kalibr-multicam-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/yyyrhli/kalibr-multicam-toolkit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![ROS1 Noetic](https://img.shields.io/badge/ROS-Noetic-22314E.svg)](https://wiki.ros.org/noetic)
 [![Platform](https://img.shields.io/badge/platform-linux-lightgrey.svg)](#已知限制)
-[![Syntax](https://img.shields.io/badge/syntax-15%20py%20%2B%2011%20sh-brightgreen)](#)
 
 把 [Kalibr](https://github.com/ethz-asl/kalibr) 这个学术界的标定工具箱，包装成**能批量跑的产线流水线**的一组脚本。
 
