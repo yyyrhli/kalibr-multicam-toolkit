@@ -1,5 +1,11 @@
 # kalibr-multicam-toolkit
 
+[![CI](https://github.com/yyyrhli/kalibr-multicam-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/yyyrhli/kalibr-multicam-toolkit/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![ROS1 Noetic](https://img.shields.io/badge/ROS-Noetic-22314E.svg)](https://wiki.ros.org/noetic)
+[![Platform](https://img.shields.io/badge/platform-linux-lightgrey.svg)](#已知限制)
+
 把 [Kalibr](https://github.com/ethz-asl/kalibr) 这个学术界的标定工具箱，包装成**能批量跑的产线流水线**的一组脚本。
 
 Kalibr 本身很强，但直接拿来标定多相机阵列，会撞上一堆工程问题：bag 的格式必须严格是 `mono8`、时间戳必须全局单调、多相机 camchain 的键名有坑、IMU 噪声参数得自己估、几百个视频文件要挑帧还要保证覆盖度。这套脚本把这些问题都处理掉了，你只需要给一个「视频 + IMU 数据」的目录。
@@ -65,6 +71,8 @@ export KALIBR_RUNTIME=/path/to/your/tartan_runtime
 ---
 
 ## 快速开始
+
+> 输入目录应该长什么样、`frames_*.csv` 各列是什么意思、标定板尺寸怎么填，先看 [examples/README.md](examples/README.md)。时间戳那节建议通读，这是最容易出错的地方。
 
 ```bash
 git clone <this-repo> && cd kalibr-multicam-toolkit

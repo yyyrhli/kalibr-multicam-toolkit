@@ -1,0 +1,19 @@
+# 本项目不是 Python 包（脚本直接以 PYTHONPATH=python 运行），
+# 此文件仅用于统一 lint 配置。
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+exclude = ["__pycache__", ".git", "docs"]
+
+[tool.ruff.lint]
+# 只启用最基础的错误与风格规则，避免对既有代码造成大量噪音
+select = ["E", "F", "W"]
+ignore = [
+    "E501",  # 行长由 line-length 控制，不单独报错
+    "E402",  # 允许模块级 import 出现在常量定义之后（脚本常见写法）
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
