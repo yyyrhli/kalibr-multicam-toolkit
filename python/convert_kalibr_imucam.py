@@ -7,7 +7,6 @@ import json
 from pathlib import Path
 
 import numpy as np
-import yaml
 
 from camera_model import KALIBR_CAMERA_MODEL, require_ds_camchain
 
